@@ -2,26 +2,25 @@
 #############    Creation des bases des fichiers de standards AXIOM pour QTOF et ORBITRAP
 ## Pour l'Orbi, calcul des ions adduits fragments isotopes sur la base des règles de CAMERA
 ## répertoire partagé pour prog et bases de données Standard + HMDB
-#repPar="S:/E20/Partage de Fichiers/"
-repPar="C:/MesDocuments/PROJETS/"
 
+library(openxlsx)
+
+repPar="O:/E20/Partage de Fichiers/"
+#repPar <- "C:/Users/jfmartin/Documents/PROJETS/"
 #source(paste(repPar,"PROG/match_mass/match_mass_script_new.R",sep=""))
 #source(paste(repPar,"PROG/tools_R/toolbox.R",sep=""))
+source(paste(repPar,"PROG/tools_DB/DB_box.R",sep=""))
 
-library(xlsx)
 ###############################################################
 ###  L A S T    B  A S E   S T A N D A R T S    A X I O M
-INdb <- "DB/CopieAXIOM_PoolCompounds_v200130.xls"
-ver <- "_200130"
-# Voir le fichier correspondant en xls pour vérifier les filtres 
-# à appliquer au fichier mis à jour par Alyssa ou Emlien
-# -> AXIOM_Pool Compounds_2014.xls
-# CopieAXIOM_PoolCompounds_v200130.xls
-
+INdb <- "copieAXIOM_PoolCompounds_v200130.xlsx"
+###
+###
 ###############################################################
 
-#std <- read.table(file = paste(repPar,INdb,sep=""), sep="\t",header = TRUE, stringsAsFactors = FALSE )
-std <- read.xlsx2(file= paste(repPar,INdb,sep=""),sheetIndex = 1,stringsAsFactors = FALSE)
+dateUp <- dateVersion()
+
+std <- read.xlsx(xlsxFile= paste(repPar,"DB/AXIOMstandards/",INdb,sep=""),sheet = 1)
 
 std$monoistopic_molecular_weigth <- as.numeric(std$monoistopic_molecular_weigth)
 std$rt <- as.numeric(std$rt)
@@ -38,8 +37,8 @@ std <- std[std$spectro =="ORBI-C18",]
 #stdmzpos <- std[!is.na(std$mzpos),c(1,4:10,12)]
 #stdmzneg <- std[!is.na(std$mzneg),c(1,4:9,11,13)]
 
-stdmzpos <- std[(std$ionisation == "pos" & !is.na(std$mz)),c(1,4,9,13,14:17)]
-stdmzneg <- std[(std$ionisation == "neg" & !is.na(std$mz)),c(1,4,9,13,14:17)]
+stdmzpos <- std[(std$ionisation == "pos" & !is.na(std$mz)),c(1,4,8,9,12:17)]
+stdmzneg <- std[(std$ionisation == "neg" & !is.na(std$mz)),c(1,4,8,9,12:17)]
 
 ## rules for CAMERA adduct and neutral loss
 rules <- read.csv(file=paste(repPar,"DB/rulesCAMERA/rulesPosNegLigth.csv",sep=""),sep=";", stringsAsFactors = FALSE)
@@ -71,10 +70,10 @@ intensity <- rep(NA, nmax)
 attribution <- rep(" ", nmax)
 
 for (i in 1:nst) {
-   cat(DBSpos$name[i]," mz=",mz[i],"\n")
+   cat(DBSpos$name[i]," mz=",DBSpos$mz[i],"\n")
    ENTRYref  <- DBSpos$axiom_id[i]
    compoundref <- DBSpos$name[i]
-   Inchiref <- DBSpos$Inchi.[i]
+   Inchiref <- DBSpos$Inchi[i]
    formularef <- DBSpos$formula_neutral[i]
    exactmassref <- DBSpos$monoistopic_molecular_weigth[i]
    mzref <- DBSpos$mz[i]
@@ -114,15 +113,15 @@ intensity <- rep(NA, nmax)
 attribution <- rep(" ", nmax)
 
 for (i in 1:nst) {
-   cat(DBSpos$name[i]," mz=",mz[i],"\n")
-   ENTRYref  <- DBSpos$axiom_id[i]
-   compoundref <- DBSpos$name[i]
-   Inchiref <- DBSpos$Inchi.[i]
-   formularef <- DBSpos$formula_neutral[i]
-   exactmassref <- DBSpos$monoistopic_molecular_weigth[i]
-   mzref <- DBSpos$mz[i]
-   rtref <- DBSpos$rt[i]
-   intensityref <- DBSpos$intensity[i]
+   cat(DBSneg$name[i]," mz=",DBSneg$mz[i],"\n")
+   ENTRYref  <- DBSneg$axiom_id[i]
+   compoundref <- DBSneg$name[i]
+   Inchiref <- DBSneg$Inchi[i]
+   formularef <- DBSneg$formula_neutral[i]
+   exactmassref <- DBSneg$monoistopic_molecular_weigth[i]
+   mzref <- DBSneg$mz[i]
+   rtref <- DBSneg$rt[i]
+   intensityref <- DBSneg$intensity[i]
    k <- 0
    for (j in 1:nsr) {
       k <- (i-1) * nsr +j
@@ -131,11 +130,11 @@ for (i in 1:nst) {
       Inchi[k] <- Inchiref
       formula[k] <- formularef
       exact.mass[k] <- exactmassref
-      mz[k] <- mzref+ rulespos$massdiff[j]
+      mz[k] <- mzref+ rulesneg$massdiff[j]
       RT[k] <- rtref
       intensity[k] <- intensityref
-      attribution[k] <- rulespos$name[j]
-      #cat("mz calc =",mz[k]," adduct name : ",rulespos$name[j],"\n")
+      attribution[k] <- rulesneg$name[j]
+      #cat("mz calc =",mz[k]," adduct name : ",rulesneg$name[j],"\n")
    }
 }
 
@@ -144,8 +143,8 @@ DBORBINEG <- data.frame(ENTRY,compound,Inchi,formula,exact.mass,RT,mz,intensity,
 ########################  SAVE DATABASES STD WITH ADDUCT FRAGMENT ####################################
 
 setwd(paste(repPar,"DB/",sep=""))
-filposname <- paste("DBORBIPOS",ver,sep="")
-filnegname <- paste("DBORBINEG",ver,sep="")
+filposname <- paste("DBORBIPOS",dateUp,sep="")
+filnegname <- paste("DBORBINEG",dateUp,sep="")
 save(DBORBIPOS, file=paste(filposname,".Rdata",sep=""))
 save(DBORBINEG, file=paste(filnegname,".Rdata",sep=""))
 ## write.table(DBORBIPOS,file=paste(filposname,".txt",sep=""),sep="\t", row.names=F,quote=F)
@@ -180,8 +179,8 @@ DBQTOFNEG <- std[(std$ionisation == "neg" & !is.na(std$mz)),c(1,4,9,13,14:17,5)]
 colnames(DBQTOFNEG) <- c("ENTRY","compound","Inchi","formula","exact.mass","RT","mz","intensity","attribution")
 
 setwd(paste(repPar,"DB/",sep=""))
-filposname <- paste("DBQTOFPOS",ver,sep="")
-filnegname <- paste("DBQTOFNEG",ver,sep="")
+filposname <- paste("DBQTOFPOS",dateUp,sep="")
+filnegname <- paste("DBQTOFNEG",dateUp,sep="")
 save(DBQTOFPOS, file=paste(filposname,".Rdata",sep=""))
 save(DBQTOFNEG, file=paste(filnegname,".Rdata",sep=""))
 ## write.table(DBQTOFPOS,file=paste(filposname,".txt",sep=""),sep="\t", row.names=F,quote=F)

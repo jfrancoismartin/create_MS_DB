@@ -24,26 +24,19 @@ library(dplyr)
 #########################################################################
 ## share directory to access to the different function of matching
 
-## repPar="//tls-tox-nas/TOXALIM/E20/Partage de Fichiers/PROG"
-## repPar <- "C:/Users/jfmartin/OneDrive Entreprise 1/Developpements"
-repPar <- "//tls-tox-nas/HOME$/jfmartin/Mes documents/PROJETS/"
-### ou
 repPar  <- "O:/E20/Partage de Fichiers/"
-### ou
-repPar <- "C:/MesDocuments/PROJETS/"
+#repPar <- "C:/Users/jfmartin/Documents/PROJETS/"
 
-#O:\E20\Partage de Fichiers\PROG\tools_DB
 source(paste(repPar,"PROG/tools_DB/DB_box.R",sep=""))
-
 
 #########################################################################
 ####
 ####     initial DB with Formula : contaminants & pesticides & PVC & 
-####           V E R S I O N   13/09/2019
 ####  adduct are included in the DB and doesn't need to be computed by enviPat
+####
+      contaminants <- "DB Screening_Contaminant_v220621.xlsx"
+####
 #########################################################################
-
-contaminants <- "(transféré sharepoint) DB Screening_Contaminant_v200619.xlsx"
 
 iniDB <- read.xlsx2(paste(repPar,"DB/ContaminantPesticides/",contaminants,sep=""),
                     sheetIndex=1,
@@ -67,8 +60,7 @@ electron <- 0.0005486
 #mzpos <- as.numeric(iniDB[[colDBmass]]) + massH - electron
 
 ## outfile date version
-datver <- Sys.time()
-datver <- paste(substr(datver,3,4),substr(datver,6,7),substr(datver,9,10),sep="")
+dateUp <- dateVersion()
 
 ## limitation du calcul isotopiques à C et S
 ## isotopes <- isotopes[isotopes$element=="C" , ]
@@ -94,22 +86,8 @@ dbcontaminantsPOS <- creaDBtoMatch(iniDBl=iniDBl, colFormula=colFormula, colID=c
                            spectro=NULL,
                            reso=20000)
 
-# lines below to computed difference between envipat and mz computed with mass monoiso of the database EJA
-# ppmDiff <- rep(NA, nrow(dbcontaminantsPOS))
-# colmzpos <- 23
-# colmzneg <- 22
-# colmzEnvipat <- 27
-# colIso <- 26
-# 
-# for (i in 1:nrow(dbcontaminantsPOS)) if (!is.na(dbcontaminantsPOS[i,colIso]) & dbcontaminantsPOS[i,colIso]=="[M]") 
-#    ppmDiff[i] <- 1e6*abs(dbcontaminantsPOS[i,colmzEnvipat] - 
-#                             dbcontaminantsPOS[i,colmzpos])/
-#    dbcontaminantsPOS[i,colmzEnvipat]
-# 
-# dbcontaminantsPOS <- data.frame(dbcontaminantsPOS,ppmDiff)
-
-save(dbcontaminantsPOS,file=paste(repPar,"DB/dbcontaminantsPOS_",datver,".Rdata",sep=""))
-write.table(dbcontaminantsPOS,file=paste(repPar,"DB/dbcontaminantsPOS_",datver,".txt",sep=""), row.names = FALSE, sep="\t")
+save(dbcontaminantsPOS,file=paste(repPar,"DB/dbcontaminantsPOS",dateUp,".Rdata",sep=""))
+write.table(dbcontaminantsPOS,file=paste(repPar,"DB/dbcontaminantsPOS",dateUp,".txt",sep=""), row.names = FALSE, sep="\t")
 
 ############################################ processing negative ioni ######################################################
 
@@ -121,20 +99,7 @@ dbcontaminantsNEG <- creaDBtoMatch(iniDBl=iniDBl, colFormula=colFormula, colID=c
                                    spectro=NULL,
                                    reso=20000)
 
-# lines below to computed difference between envipat and mz computed with mass monoiso of the database EJA
-# ppmDiff <- rep(NA, nrow(dbcontaminantsNEG))
-# colmzpos <- 23
-# colmzneg <- 22
-# colmzEnvipat <- 27
-# colIso <- 26
-# 
-# for (i in 1:nrow(dbcontaminantsNEG)) if (!is.na(dbcontaminantsNEG[i,colIso]) & dbcontaminantsNEG[i,colIso]=="[M]") 
-#       ppmDiff[i] <- 1e6*abs(dbcontaminantsNEG[i,colmzEnvipat] - 
-#                             dbcontaminantsNEG[i,colmzneg])/
-#                             dbcontaminantsNEG[i,colmzEnvipat]
-# dbcontaminantsNEG <- data.frame(dbcontaminantsNEG,ppmDiff)
-
-save(dbcontaminantsNEG,file=paste(repPar,"DB/dbcontaminantsNEG_",datver,".Rdata",sep=""))
-write.table(dbcontaminantsNEG,file=paste(repPar,"DB/dbcontaminantsNEG_",datver,".txt",sep=""), row.names = FALSE, sep="\t")
+save(dbcontaminantsNEG,file=paste(repPar,"DB/dbcontaminantsNEG",dateUp,".Rdata",sep=""))
+write.table(dbcontaminantsNEG,file=paste(repPar,"DB/dbcontaminantsNEG",dateUp,".txt",sep=""), row.names = FALSE, sep="\t")
 #######################################################  END compest ########################################################################
 

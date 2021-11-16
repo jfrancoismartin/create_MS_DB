@@ -4,12 +4,20 @@
 library(XML)
 library(methods)
 
-setwd("C:/dataProjets/HMDB")
+repPar  <- "O:/E20/Partage de Fichiers/"
+#repPar <- "C:/Users/jfmartin/Documents/PROJETS/"
+
+source(paste(repPar,"PROG/tools_DB/DB_box.R",sep=""))
 
 ##################################  H M D B   ALL METABOLITES ######################################
-
+## where is the HMDB domwload file
+setwd("C:/dataProjets/HMDB")
 infil <- "hmdb_metabolites.xml"
-outfil <- "HMDB_200901"
+####################################################################################################
+
+
+dateUp <- dateVersion()
+outfil <- paste("HMDB",dateUp,sep="")
 
 #### try to parse new version of HMDB database
 
@@ -45,9 +53,9 @@ write.table(xHMDB,file=paste(outfil,".txt",sep=""),sep="\t", row.names=F,quote=F
 # i <-28; for (j in 1:100) cat(j,xmlValue(xmltop[[i]][[j]]),"\n")
 
 ##################################  H M D B    U R I N E ######################################
-
 infil <- "urine_metabolites.xml"
-outfil <- "HMDBurine_200901"
+
+outfil <- paste("HMDBurine",dateUp,sep="")
 
 #### try to parse new version of HMDB database
 
@@ -83,9 +91,9 @@ save(xHMDB,file=paste(outfil,".Rdata",sep=""))
 write.table(xHMDB,file=paste(outfil,".txt",sep=""),sep="\t", row.names=F,quote=F)
 
 ##################################  H M D B   S E R U M ######################################
-
 infil <- "serum_metabolites.xml"
-outfil <- "HMDBserum_200901"
+
+outfil <- paste("HMDBserum",dateUp,sep="")
 
 #### try to parse new version of HMDB database
 
@@ -121,9 +129,9 @@ save(xHMDB,file=paste(outfil,".Rdata",sep=""))
 write.table(xHMDB,file=paste(outfil,".txt",sep=""),sep="\t", row.names=F,quote=F)
 
 ##################################  H M D B   F E C E S  ######################################
-
 infil <- "feces_metabolites.xml"
-outfil <- "HMDBfeces_200901"
+
+outfil <- paste("HMDBfeces",dateUp,sep="")
 
 #### try to parse new version of HMDB database
 #repRes=paste(repPar,"DB/",sep="")
